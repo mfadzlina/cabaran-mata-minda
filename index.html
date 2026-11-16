@@ -38,6 +38,15 @@ button:disabled{opacity:.55;cursor:default}
 .qrtxt{font-size:16px;color:var(--muted);max-width:220px}
 .qrtxt b{display:block;font-family:"Baloo 2";font-size:24px;color:var(--ink);line-height:1.1;margin-bottom:6px}
 @media (max-width:480px){.qrbox{flex-direction:column;text-align:center}.qrbox img{width:180px;height:180px}}
+.grp{display:block;margin:0 0 10px;text-align:left}
+.grp b{display:block;font-family:"Baloo 2";font-size:18px;margin-bottom:6px}
+.grp select{width:100%;font-family:Nunito;font-weight:700;font-size:17px;padding:10px 12px;border:3px solid var(--ink);border-radius:14px;background:#fff;color:var(--ink)}
+.grpmsg{min-height:22px;font-weight:700;color:var(--pop);margin-bottom:10px}
+.reset{color:var(--muted);font-size:12px}
+.emark{background:var(--sun);border:3px solid var(--ink);border-radius:18px;box-shadow:4px 4px 0 var(--ink);padding:12px;margin:14px auto 4px;max-width:320px}
+.emark span{display:block;font-weight:800}
+.emark b{display:block;font-family:"Baloo 2";font-size:60px;line-height:1}
+.emark small{font-weight:700}
 /* HUD */
 .hud{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .pill{background:#fff;border:3px solid var(--ink);border-radius:99px;padding:4px 14px;font-weight:800;font-size:15px;white-space:nowrap}
@@ -91,7 +100,7 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:9}
  <section id="intro" class="card intro">
   <div class="emoji">🧐</div>
   <h1>Cabaran <span>Mata</span> &amp; Minda</h1>
-  <p>12 soalan. Sepetkan mata, picit otak, jangan cepat melatah!</p>
+  <p>12 soalan. Satu peranti setiap kumpulan, satu peluang sahaja!</p>
   <div class="rules">
    <div class="rule"><b>👀</b>4 ilusi nombor tersorok</div>
    <div class="rule"><b>🧠</b>8 teka-teki minda</div>
@@ -101,7 +110,12 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:9}
    <img src="img/qr.png" alt="Kod QR untuk buka permainan">
    <div class="qrtxt"><b>📱 Imbas untuk main</b>Guna kamera telefon, kemudian tekan <i>Mula Main</i> serentak!</div>
   </div>
-  <button class="btn-pop" id="start" style="font-size:22px;padding:12px 34px">Mula Main ▶</button>
+  <label class="grp"><b>Pilih kumpulan anda</b>
+   <select id="grp"><option value="">— Pilih kumpulan —</option></select>
+  </label>
+  <div id="grpMsg" class="grpmsg"></div>
+  <button class="btn-pop" id="start" style="font-size:22px;padding:12px 34px" disabled>Mula Main ▶</button>
+  <div class="foot"><a href="#" id="reset" class="reset">Reset peranti (fasilitator)</a></div>
  </section>
 
  <section id="game" class="hidden">
@@ -124,6 +138,7 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:9}
   <div class="medal" id="medal">🏆</div>
   <h2 id="rank"></h2>
   <div class="score"><span id="final">0</span><small style="font-size:26px;color:var(--muted)"> / 120</small></div>
+  <div class="emark"><span id="eGrp"></span><b id="eMark">0</b><small>Markah Energizer (0–10)</small></div>
   <div class="stats">
    <div class="stat"><b id="sRight">0</b>Betul</div>
    <div class="stat"><b id="sBest">0</b>Streak terbaik</div>
@@ -131,7 +146,7 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:9}
   </div>
   <div class="review" id="review"></div>
   <div class="row">
-   <button class="btn-pop" id="again">Main Lagi 🔁</button>
+   
    <button class="btn-ghost" id="copy">Salin Skor 📋</button>
   </div>
   <div id="copied" class="foot"></div>
@@ -157,6 +172,9 @@ const MINDA=[
  {q:"Ada 3 biji epal. Awak ambil 2. Berapa biji epal yang AWAK ada?",o:["1","2","3","0"],a:1,why:"Awak ambil 2, jadi awak ada 2 biji."},
  {q:"Apa yang boleh pecah tanpa disentuh langsung?",o:["Kaca","Telur","Janji","Belon"],a:2,why:"Janji boleh dipecahkan tanpa sentuh apa-apa."}
 ];
+const GROUPS=["English","AI For Industrial Automation","Electrical Circuit / Workshop","IC Assembly & Packaging Process","Fiber Optic Communication Technology","Programming Language","Programming and Interfacing","Electrical Drafting and Design","Offshore Platform","AutoCAD Plant 3D for Designer","CSTP"];
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},clear(){try{Object.keys(localStorage).filter(k=>k.startsWith("cmm_")).forEach(k=>localStorage.removeItem(k))}catch(e){}}};
+let grp=null;
 const TIME=30;
 let Q=[],i=0,pts=0,streak=0,best=0,right=0,hints=0,tick=null,left=TIME,usedHint=false,locked=false,log=[];
 const $=s=>document.getElementById(s);
@@ -167,7 +185,7 @@ function build(){
  Q=[];let a=0;for(let k=0;k<12;k++){ if(k%3===2&&a<il.length) Q.push(il[a++]); else Q.push(mi.shift()); }
  while(a<il.length)Q.push(il[a++]);
 }
-function start(){build();i=0;pts=0;streak=0;best=0;right=0;hints=0;log=[];
+function start(){if(!grp)return;if(store.get("cmm_done")){checkGrp();return;}build();i=0;pts=0;streak=0;best=0;right=0;hints=0;log=[];
  $("intro").classList.add("hidden");$("end").classList.add("hidden");$("game").classList.remove("hidden");show();}
 function hud(){$("qno").textContent=(i+1)+"/"+Q.length;$("prog").style.width=(i/Q.length*100)+"%";$("pts").textContent=pts;$("streak").textContent="🔥 "+streak;}
 function show(){
@@ -215,10 +233,19 @@ function finish(){
  const r=pts>=100?["🏆","Mata Helang, Otak Genius!"]:pts>=75?["🥇","Hebat! Hampir sempurna"]:pts>=50?["🥈","Boleh tahan, tapi boleh lagi!"]:pts>=25?["🥉","Mata kena rehat sikit 😴"]:["🙈","Cuba lagi, jangan putus asa!"];
  $("medal").textContent=r[0];$("rank").textContent=r[1];
  $("review").innerHTML=log.map((l,k)=>`<div>${l.ok?"✅":"❌"} <b>${k+1}.</b> ${l.q} <span style="color:var(--muted)">→ ${l.a}</span></div>`).join("");
+ const mark=Math.round(pts/12);
+ $("eGrp").textContent="Kumpulan "+grp+" · "+GROUPS[grp-1];$("eMark").textContent=mark;
+ store.set("cmm_done",JSON.stringify({g:grp,m:mark,p:pts}));
  $("copied").textContent="";if(pts>=50)burst(160);
 }
-$("start").onclick=start;$("again").onclick=start;
-$("copy").onclick=async()=>{const t=`Saya dapat ${pts}/120 dalam Cabaran Mata & Minda! (${right}/12 betul, streak ${best}) 🧐 Berani cuba?`;
+const sel=$("grp");GROUPS.forEach((g,k)=>{const o=document.createElement("option");o.value=k+1;o.textContent="Kumpulan "+(k+1)+" · "+g;sel.appendChild(o)});
+function checkGrp(){const d=store.get("cmm_done");if(d){const x=JSON.parse(d);sel.value=x.g;sel.disabled=true;$("start").disabled=true;
+  $("grpMsg").textContent="✅ Kumpulan "+x.g+" dah jawab. Markah Energizer: "+x.m+"/10";return true}return false}
+sel.onchange=()=>{grp=+sel.value||null;$("start").disabled=!grp;$("grpMsg").textContent=""};
+let rc=0;$("reset").onclick=e=>{e.preventDefault();if(++rc<2){$("reset").textContent="Tekan sekali lagi untuk reset";return}store.clear();location.reload()};
+checkGrp();
+$("start").onclick=start;
+$("copy").onclick=async()=>{const t=`Kumpulan ${grp} (${GROUPS[grp-1]}): Markah Energizer ${Math.round(pts/12)}/10 — ${pts}/120 dalam Cabaran Mata & Minda! (${right}/12 betul, streak ${best}) 🧐 Berani cuba?`;
  try{await navigator.clipboard.writeText(t);$("copied").textContent="Disalin! Tampal di WhatsApp 👍";}catch(e){$("copied").textContent=t;}};
 function floatTxt(t){const d=document.createElement("div");d.className="float";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),1000);}
 // confetti
