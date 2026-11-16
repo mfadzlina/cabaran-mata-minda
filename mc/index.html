@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kuiz Micro-Credential</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+
+:root{--bg:#fff6e6;--ink:#2b2140;--pop:#ff5d73;--sun:#ffc23d;--mint:#2ec4a6;--sky:#5b8cff;--card:#ffffff;--muted:#7a6f8c}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:Nunito,system-ui,sans-serif;color:var(--ink);background:var(--bg);
+ background-image:radial-gradient(circle at 10% 10%,#ffe0b3 0 120px,transparent 121px),radial-gradient(circle at 92% 18%,#ffd1dc 0 90px,transparent 91px),radial-gradient(circle at 85% 95%,#c9f2e8 0 140px,transparent 141px);
+ background-attachment:fixed;display:flex;justify-content:center;padding:18px 14px 40px}
+.wrap{width:100%;max-width:640px}
+h1,h2,h3,.big{font-family:"Baloo 2",sans-serif;margin:0}
+.card{background:var(--card);border:3px solid var(--ink);border-radius:22px;box-shadow:6px 6px 0 var(--ink);padding:22px}
+.hidden{display:none!important}
+button{font-family:"Baloo 2",sans-serif;font-weight:700;font-size:18px;cursor:pointer;border:3px solid var(--ink);border-radius:14px;padding:10px 18px;background:var(--sun);color:var(--ink);box-shadow:3px 3px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
+button:disabled{opacity:.55;cursor:default}
+.btn-pop{background:var(--pop);color:#fff}
+.btn-mint{background:var(--mint);color:#fff}
+.btn-ghost{background:#fff}
+/* intro */
+.intro{text-align:center}
+.intro .emoji{font-size:64px;line-height:1;animation:bob 2.2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px) rotate(-4deg)}}
+.intro h1{font-size:40px;line-height:1.05;margin:10px 0 6px}
+.intro h1 span{color:var(--pop)}
+.intro p{color:var(--muted);font-size:17px;margin:6px 0 18px}
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 20px}
+.rule{background:var(--bg);border:2px dashed var(--ink);border-radius:14px;padding:10px 6px;font-size:14px;font-weight:700}
+.rule b{display:block;font-size:24px}
+.qrbox{display:flex;align-items:center;gap:18px;justify-content:center;background:var(--bg);border:3px solid var(--ink);border-radius:18px;padding:14px;margin:0 0 20px;text-align:left}
+.qrbox img{width:200px;height:200px;border:3px solid var(--ink);border-radius:12px;background:#fff;image-rendering:pixelated;flex:none}
+.qrtxt{font-size:16px;color:var(--muted);max-width:220px}
+.qrtxt b{display:block;font-family:"Baloo 2";font-size:24px;color:var(--ink);line-height:1.1;margin-bottom:6px}
+@media (max-width:480px){.qrbox{flex-direction:column;text-align:center}.qrbox img{width:180px;height:180px}}
+.grp{display:block;margin:0 0 10px;text-align:left}
+.grp b{display:block;font-family:"Baloo 2";font-size:18px;margin-bottom:6px}
+.grp select{width:100%;font-family:Nunito;font-weight:700;font-size:17px;padding:10px 12px;border:3px solid var(--ink);border-radius:14px;background:#fff;color:var(--ink)}
+.grpmsg{min-height:22px;font-weight:700;color:var(--pop);margin-bottom:10px}
+.reset{color:var(--muted);font-size:12px}
+.emark{background:var(--sun);border:3px solid var(--ink);border-radius:18px;box-shadow:4px 4px 0 var(--ink);padding:12px;margin:14px auto 4px;max-width:320px}
+.emark span{display:block;font-weight:800}
+.emark b{display:block;font-family:"Baloo 2";font-size:60px;line-height:1}
+.emark small{font-weight:700}
+.snd{cursor:pointer;font-size:15px;padding:4px 10px;box-shadow:none}
+/* HUD */
+.hud{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.pill{background:#fff;border:3px solid var(--ink);border-radius:99px;padding:4px 14px;font-weight:800;font-size:15px;white-space:nowrap}
+.bar{flex:1;height:16px;background:#fff;border:3px solid var(--ink);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--mint),var(--sky));transition:width .4s}
+.timer{height:8px;background:#eee3d2;border-radius:99px;overflow:hidden;margin:0 0 14px}
+.timer i{display:block;height:100%;width:100%;background:var(--pop);transition:width 1s linear}
+.tag{display:inline-block;font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:99px;border:2px solid var(--ink);margin-bottom:10px}
+.tag.mata{background:#d8e4ff}.tag.minda{background:#ffe0e6}
+.q{font-size:24px;line-height:1.25;margin:0 0 16px}
+.imgbox{position:relative;border:3px solid var(--ink);border-radius:14px;overflow:hidden;margin-bottom:14px;background:#000}
+.imgbox img{display:block;width:100%;height:auto;transition:filter .6s,transform .6s}
+.imgbox.squint img{filter:blur(7px) contrast(1.15);transform:scale(1.02)}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;background:#fff;font-size:19px;display:flex;gap:12px;align-items:center}
+.opt .k{flex:none;width:32px;height:32px;border-radius:50%;border:2px solid var(--ink);display:grid;place-items:center;background:var(--sun);font-size:16px}
+.opt.right{background:#c9f2e8}.opt.wrong{background:#ffd1d8;animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.ans{display:flex;gap:10px}
+.ans input{flex:1;min-width:0;font-family:"Baloo 2",sans-serif;font-size:26px;font-weight:800;text-align:center;border:3px solid var(--ink);border-radius:14px;padding:6px 10px;outline:none}
+.ans input:focus{box-shadow:0 0 0 4px #ffc23d88}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tools button{font-size:15px;padding:6px 12px}
+.feedback{margin-top:16px;border-radius:14px;padding:14px 16px;border:3px solid var(--ink);font-weight:700;font-size:17px;animation:pop .3s}
+.feedback.ok{background:#c9f2e8}.feedback.no{background:#ffe0e6}
+.feedback .why{font-weight:500;color:#4b4060;margin-top:4px;font-size:15px}
+@keyframes pop{from{transform:scale(.9);opacity:0}}
+.next{margin-top:14px;width:100%}
+.float{position:fixed;left:50%;top:40%;transform:translateX(-50%);font-family:"Baloo 2";font-size:44px;font-weight:800;color:var(--mint);pointer-events:none;animation:up 1s forwards;text-shadow:2px 2px 0 var(--ink)}
+@keyframes up{to{transform:translate(-50%,-80px);opacity:0}}
+/* end */
+.end{text-align:center}
+.end .medal{font-size:80px;line-height:1;animation:bob 2s infinite}
+.end h2{font-size:34px;margin:6px 0}
+.score{font-family:"Baloo 2";font-size:64px;font-weight:800;color:var(--pop);line-height:1}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+.stat{background:var(--bg);border:2px solid var(--ink);border-radius:14px;padding:10px 4px;font-size:13px;font-weight:700}
+.stat b{display:block;font-family:"Baloo 2";font-size:26px}
+.review{text-align:left;margin:10px 0 18px;font-size:15px}
+.review div{padding:7px 0;border-bottom:1px dashed #d8cbb5}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:9}
+.foot{text-align:center;color:var(--muted);font-size:13px;margin-top:16px}
+@media (max-width:480px){.intro h1{font-size:32px}.q{font-size:21px}.rules{grid-template-columns:1fr 1fr 1fr}}
+
+:root{--pop:#6c4cff;--sun:#ffc23d;--mint:#2ec4a6}
+body{background-color:#f1edff;background-image:radial-gradient(circle at 8% 12%,#ddd3ff 0 120px,transparent 121px),radial-gradient(circle at 92% 20%,#ffe0b3 0 90px,transparent 91px),radial-gradient(circle at 85% 95%,#c9f2e8 0 140px,transparent 141px)}
+.badge{display:inline-flex;gap:6px;align-items:center;background:var(--ink);color:#fff;border-radius:99px;padding:4px 12px;font-weight:800;font-size:13px;letter-spacing:.05em}
+.tag.mc{background:#e6defe}
+.ptsfly{color:var(--pop)}
+.big-score{font-family:"Baloo 2";font-size:56px;font-weight:800;color:var(--pop);line-height:1}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+<div class="wrap">
+
+ <section id="intro" class="card intro">
+  <span class="badge">🎓 MQA · GGP: MICRO-CREDENTIALS</span>
+  <div class="emoji" style="margin-top:10px">🏅</div>
+  <h1>Kuiz <span>Micro-Credential</span></h1>
+  <p>Seberapa faham kumpulan anda tentang MC? Jawab cepat, markah lebih tinggi!</p>
+  <div class="rules">
+   <div class="rule"><b>❓</b>12 soalan aneka pilihan</div>
+   <div class="rule"><b>⚡</b>Lagi cepat, lagi banyak mata</div>
+   <div class="rule"><b>🏆</b>Papan pendahulu 11 kumpulan</div>
+  </div>
+  <div class="qrbox">
+   <img src="qr.png" alt="Kod QR untuk buka kuiz">
+   <div class="qrtxt"><b>📱 Imbas untuk main</b>Satu telefon untuk satu kumpulan. Pilih kumpulan, kemudian tekan <i>Mula Kuiz</i>.</div>
+  </div>
+  <label class="grp"><b>Pilih kumpulan anda</b>
+   <select id="grp"><option value="">— Pilih kumpulan —</option></select>
+  </label>
+  <div id="grpMsg" class="grpmsg"></div>
+  <button class="btn-pop" id="start" style="font-size:22px;padding:12px 34px" disabled>Mula Kuiz ▶</button>
+  <div class="foot"><a href="#" id="reset" class="reset">Reset peranti (fasilitator)</a></div>
+ </section>
+
+ <section id="game" class="hidden">
+  <div class="hud">
+   <span class="pill" id="qno">1/12</span>
+   <div class="bar"><i id="prog"></i></div>
+   <span class="pill">⭐ <span id="pts">0</span></span>
+   <span class="pill" id="streak">🔥 0</span>
+   <button class="pill snd" id="snd" title="Bunyi">🔊</button>
+  </div>
+  <div class="card">
+   <div class="timer"><i id="tbar"></i></div>
+   <span class="tag mc" id="tag">🎓 Micro-Credential</span>
+   <h3 class="q" id="qtext"></h3>
+   <div id="area"></div>
+   <div id="fb"></div>
+  </div>
+ </section>
+
+ <section id="end" class="card end hidden">
+  <div class="medal" id="medal">🏆</div>
+  <h2 id="rank"></h2>
+  <div class="emark"><span id="eGrp"></span><b id="eScore">0</b><small>MATA KUIZ (untuk papan pendahulu)</small></div>
+  <div class="stats">
+   <div class="stat"><b id="sRight">0</b>Betul</div>
+   <div class="stat"><b id="sMark">0</b>Markah Energizer /10</div>
+   <div class="stat"><b id="sBest">0</b>Streak terbaik</div>
+  </div>
+  <p style="font-weight:700;margin:0 0 10px">📣 Tunjuk skrin ini kepada fasilitator</p>
+  <div class="review" id="review"></div>
+  <div class="row"><button class="btn-ghost" id="copy">Salin Skor 📋</button></div>
+  <div id="copied" class="foot"></div>
+ </section>
+
+ <div class="foot">Rujukan: MQA, <i>Guidelines to Good Practices: Micro-credentials</i> (Edisi Pertama, 2020)</div>
+</div>
+
+<script>
+const QS=[
+ {q:"Menurut MQA, micro-credential ialah ...",o:["Pensijilan digital bagi pengetahuan, kemahiran dan kompetensi yang ditaksir dalam bidang khusus","Sijil kehadiran bagi mana-mana kursus pendek","Ijazah yang dipendekkan tempohnya","Kursus dalam talian percuma tanpa pentaksiran"],a:0,why:"GGP: Micro-credentials (Seksyen 4.0) mentakrifkan MC sebagai pensijilan digital bagi pengetahuan, kemahiran dan kompetensi yang ditaksir dalam bidang khusus."},
+ {q:"Agensi manakah yang mengeluarkan Guidelines to Good Practices: Micro-credentials di Malaysia?",o:["HRD Corp","Jabatan Pembangunan Kemahiran (JPK)","Agensi Kelayakan Malaysia (MQA)","Kementerian Sumber Manusia"],a:2,why:"GGP: Micro-credentials dibangunkan oleh Malaysian Qualifications Agency (MQA)."},
+ {q:"Edisi Pertama GGP: Micro-credentials MQA bertarikh tahun ...",o:["2017","2020","2022","2024"],a:1,why:"GGP: Micro-credentials Edisi Pertama bertarikh 2020."},
+ {q:"Yang manakah BUKAN justifikasi micro-credential dalam GGP MQA?",o:["Pembelajaran sepanjang hayat","Boleh dihimpun (stackable)","Akses yang lebih luas","Menggantikan semua program ijazah"],a:3,why:"Lima justifikasi MC: pembelajaran sepanjang hayat, alternatif, akses, stackable, dan pengiktirafan pembelajaran tidak formal. MC tidak menggantikan ijazah."},
+ {q:"Apakah maksud micro-credential yang 'stackable'?",o:["Boleh diambil serentak dalam satu hari","Boleh dikumpul ke arah anugerah kelayakan atau pemindahan kredit","Boleh dicetak pada satu sijil sahaja","Hanya untuk pelajar sepenuh masa"],a:1,why:"Stackable bermaksud pelajar boleh mengumpul MC dan kreditnya ke arah anugerah kelayakan atau pemindahan kredit."},
+ {q:"Format pensijilan MC yang 'sangat disyorkan' oleh MQA untuk memudahkan pengesahan ialah ...",o:["Sijil bercetak berbingkai","Surat tawaran","Lencana digital (digital badge)","Transkrip bertulis tangan"],a:2,why:"GGP (Seksyen 9.8) sangat mengesyorkan lencana digital kerana mudah disahkan dan dikongsi."},
+ {q:"Yang manakah BUKAN kategori micro-credential dalam GGP MQA?",o:["Komponen program diakreditasi satu IPT","Komponen program diakreditasi beberapa IPT","Berdiri sendiri (stand-alone)","Kursus tanpa sebarang pentaksiran"],a:3,why:"Tiga kategori: komponen program satu IPT, komponen program beberapa IPT, dan berdiri sendiri. Semua MC mesti ditaksir."},
+ {q:"MC berdiri sendiri (stand-alone) boleh dipindah kredit sehingga berapa peratus kredit program diakreditasi?",o:["10%","30%","50%","100%"],a:1,why:"Bagi MC berdiri sendiri, pemindahan kredit dihadkan sehingga 30% daripada kredit program diakreditasi (laluan MOOC, APEL(C) dan MC)."},
+ {q:"Dalam MQF, 1 kredit bersamaan 40 jam pembelajaran pelajar (SLT). Berapa jam SLT bagi MC 3 kredit?",o:["40 jam","80 jam","120 jam","300 jam"],a:2,why:"3 kredit × 40 jam = 120 jam SLT, sama seperti contoh Malaysian Micro-Credential Statement dalam GGP."},
+ {q:"APEL(C) bermaksud ...",o:["Ujian kemasukan untuk program asasi","Pengiktirafan pembelajaran berasaskan pengalaman untuk penganugerahan kredit","Penilaian prestasi pensyarah","Pendaftaran kursus secara dalam talian"],a:1,why:"APEL(C) ialah Accreditation of Prior Experiential Learning for Credit Award, iaitu kredit diberi atas pembelajaran berasaskan pengalaman."},
+ {q:"MC boleh dibina daripada program diakreditasi di semua tahap MQF KECUALI ...",o:["Program Diploma","Program Sarjana Muda","Program Asasi (Foundation)","Program Sijil"],a:2,why:"GGP mengecualikan program Asasi dan program yang ditaksir sepenuhnya melalui tesis atau disertasi."},
+ {q:"Siapakah yang boleh menawarkan micro-credential menurut GGP MQA?",o:["Universiti awam sahaja","IPT dan penyedia lain seperti institut latihan dan perunding","Syarikat swasta sahaja","Kementerian sahaja"],a:1,why:"MC boleh ditawarkan oleh Institusi Pendidikan Tinggi (IPT) dan penyedia lain seperti institut latihan dan perunding."}
+];
+const GROUPS=["English","AI For Industrial Automation","Electrical Circuit / Workshop","IC Assembly & Packaging Process","Fiber Optic Communication Technology","Programming Language","Programming and Interfacing","Electrical Drafting and Design","Offshore Platform","AutoCAD Plant 3D for Designer","CSTP"];
+const KEY="mcq_done";
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const $=s=>document.getElementById(s);
+// ===== AUDIO (Web Audio, tiada fail) =====
+const SFX={ctx:null,on:true,music:null,master:null,
+ init(){if(this.ctx)return;try{const C=window.AudioContext||window.webkitAudioContext;this.ctx=new C();this.master=this.ctx.createGain();this.master.gain.value=.9;this.master.connect(this.ctx.destination);}catch(e){this.ctx=null}},
+ tone(f,t0,d,type="sine",v=.25,slide=0){const c=this.ctx;if(!c||!this.on)return;const o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f,c.currentTime+t0);
+  if(slide)o.frequency.exponentialRampToValueAtTime(f*slide,c.currentTime+t0+d);
+  g.gain.setValueAtTime(0,c.currentTime+t0);g.gain.linearRampToValueAtTime(v,c.currentTime+t0+.01);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+t0+d);
+  o.connect(g);g.connect(this.master);o.start(c.currentTime+t0);o.stop(c.currentTime+t0+d+.05);},
+ click(){this.tone(660,0,.06,"triangle",.15)},
+ right(){[523,659,784,1047].forEach((f,k)=>this.tone(f,k*.08,.25,"triangle",.22))},
+ wrong(){this.tone(220,0,.35,"sawtooth",.15,.6);this.tone(160,.12,.4,"square",.08,.7)},
+ tick(){this.tone(1200,0,.05,"square",.08)},
+ hint(){this.tone(400,0,.4,"sine",.15,2)},
+ streak(){[784,988,1175,1568].forEach((f,k)=>this.tone(f,k*.06,.18,"square",.1))},
+ fanfare(){[[523,0],[523,.15],[523,.3],[659,.45],[784,.75],[659,.95],[784,1.1],[1047,1.3]].forEach(([f,t])=>{this.tone(f,t,.35,"triangle",.22);this.tone(f/2,t,.35,"sine",.12)})},
+ startMusic(){if(!this.ctx||this.music)return;const c=this.ctx,bpm=104,b=60/bpm;
+  const mel=[523,0,659,784,659,0,587,523,440,0,523,587,523,0,392,0];const bass=[131,131,165,165,147,147,110,110];
+  const g=c.createGain();g.gain.value=this.on?.35:0;g.connect(this.master);let step=0,next=c.currentTime+.1;
+  const play=(f,t,d,type,v)=>{const o=c.createOscillator(),e=c.createGain();o.type=type;o.frequency.value=f;e.gain.setValueAtTime(0,t);e.gain.linearRampToValueAtTime(v,t+.01);e.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(e);e.connect(g);o.start(t);o.stop(t+d+.05)};
+  const id=setInterval(()=>{while(next<c.currentTime+.3){const m=mel[step%16];if(m)play(m,next,b*.45,"triangle",.09);
+    if(step%2===0)play(bass[(step/2|0)%8],next,b*.9,"sine",.14);
+    if(step%4===2)play(2400,next,.03,"square",.015);
+    next+=b/2;step++;}},60);
+  this.music={g,id};},
+ stopMusic(){if(!this.music)return;clearInterval(this.music.id);const g=this.music.g;try{g.gain.linearRampToValueAtTime(0,this.ctx.currentTime+.4)}catch(e){}setTimeout(()=>g.disconnect(),600);this.music=null;},
+ toggle(){this.on=!this.on;if(this.music)this.music.g.gain.value=this.on?.35:0;$("snd").textContent=this.on?"🔊":"🔇";}
+};
+
+const TIME=20;
+let Q=[],i=0,pts=0,streak=0,best=0,right=0,tick=null,left=TIME,locked=false,log=[],grp=null,t0=0;
+function shuffle(a){for(let k=a.length-1;k>0;k--){const j=Math.random()*(k+1)|0;[a[k],a[j]]=[a[j],a[k]]}return a}
+function hud(){$("qno").textContent=(i+1)+"/"+Q.length;$("prog").style.width=(i/Q.length*100)+"%";$("pts").textContent=pts;$("streak").textContent="🔥 "+streak;}
+function start(){if(!grp||store.get(KEY))return;SFX.init();if(SFX.ctx&&SFX.ctx.state==="suspended")SFX.ctx.resume();SFX.click();SFX.startMusic();
+ Q=shuffle(QS.slice());i=0;pts=0;streak=0;best=0;right=0;log=[];
+ $("intro").classList.add("hidden");$("game").classList.remove("hidden");show();}
+function show(){
+ const q=Q[i];locked=false;$("fb").innerHTML="";hud();$("qtext").textContent=q.q;
+ const order=shuffle([0,1,2,3]);
+ $("area").innerHTML=`<div class="opts">${order.map((o,k)=>`<button class="opt" data-o="${o}"><span class="k">${"ABCD"[k]}</span>${q.o[o]}</button>`).join("")}</div>`;
+ $("area").querySelectorAll(".opt").forEach(b=>b.onclick=()=>{if(locked)return;const ok=+b.dataset.o===q.a;b.classList.add(ok?"right":"wrong");
+  if(!ok)$("area").querySelector(`.opt[data-o="${q.a}"]`).classList.add("right");judge(ok);});
+ left=TIME;t0=performance.now();const tb=$("tbar");tb.style.transition="none";tb.style.width="100%";requestAnimationFrame(()=>{tb.style.transition="width 1s linear"});
+ clearInterval(tick);tick=setInterval(()=>{left--;tb.style.width=(left/TIME*100)+"%";if(left<=5&&left>0&&!locked)SFX.tick();
+  if(left<=0){clearInterval(tick);if(!locked){$("area").querySelector(`.opt[data-o="${Q[i].a}"]`).classList.add("right");judge(false,true);}}},1000);
+}
+function judge(ok,timeout){
+ if(locked)return;locked=true;clearInterval(tick);const q=Q[i];
+ const used=Math.min((performance.now()-t0)/1000,TIME);let gain=0;
+ if(ok){gain=Math.round(500+500*(1-used/TIME));right++;streak++;best=Math.max(best,streak);
+  if(streak>=3)gain+=100;pts+=gain;(streak>=2?SFX.streak():SFX.right());burst(28);floatTxt("+"+gain);}
+ else{streak=0;SFX.wrong();}
+ hud();log.push({ok,q:q.q,a:q.o[q.a]});
+ const head=ok?(streak>=3?`Power! ${streak} berturut-turut 🔥 (+100 bonus)`:"Betul! 🎉"):(timeout?"Masa tamat ⏰":"Alamak, salah 😅");
+ $("fb").innerHTML=`<div class="feedback ${ok?"ok":"no"}">${head}${ok?"":` Jawapan: <b>${q.o[q.a]}</b>`}<div class="why">${q.why}</div></div>
+  <button class="next btn-pop" id="nx">${i===Q.length-1?"Lihat Keputusan 🏁":"Soalan Seterusnya →"}</button>`;
+ $("nx").onclick=()=>{SFX.click();i++;if(i<Q.length)show();else finish();};
+ $("nx").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function finish(){SFX.stopMusic();setTimeout(()=>SFX.fanfare(),300);
+ $("game").classList.add("hidden");$("end").classList.remove("hidden");
+ const mark=Math.round(right/12*10);
+ $("eGrp").textContent="Kumpulan "+grp+" · "+GROUPS[grp-1];$("eScore").textContent=pts.toLocaleString("en");
+ $("sRight").textContent=right+"/12";$("sMark").textContent=mark;$("sBest").textContent=best;
+ const r=right>=11?["🏆","Pakar Micro-Credential!"]:right>=9?["🥇","Hebat! Faham betul"]:right>=6?["🥈","Boleh tahan!"]:right>=3?["🥉","Perlu ulang kaji GGP 📘"]:["🙈","Jom baca GGP: MC dulu!"];
+ $("medal").textContent=r[0];$("rank").textContent=r[1];
+ $("review").innerHTML=log.map((l,k)=>`<div>${l.ok?"✅":"❌"} <b>${k+1}.</b> ${l.q} <span style="color:var(--muted)">→ ${l.a}</span></div>`).join("");
+ store.set(KEY,JSON.stringify({g:grp,p:pts,r:right,m:mark}));if(right>=6)burst(160);
+}
+function floatTxt(t){const d=document.createElement("div");d.className="float ptsfly";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),1000);}
+const cv=$("fx"),cx=cv.getContext("2d");let parts=[];
+function rs(){cv.width=innerWidth;cv.height=innerHeight}addEventListener("resize",rs);rs();
+function burst(n){const cols=["#6c4cff","#ffc23d","#2ec4a6","#ff5d73","#5b8cff"];const was=parts.length;
+ for(let k=0;k<n;k++)parts.push({x:innerWidth/2,y:innerHeight*.45,vx:(Math.random()-.5)*14,vy:-Math.random()*13-4,r:Math.random()*6+4,c:cols[k%5],a:Math.random()*6,l:90});
+ if(!was)loop();}
+function loop(){cx.clearRect(0,0,cv.width,cv.height);parts.forEach(p=>{p.vy+=.35;p.x+=p.vx;p.y+=p.vy;p.a+=.2;p.l--;cx.save();cx.translate(p.x,p.y);cx.rotate(p.a);cx.fillStyle=p.c;cx.fillRect(-p.r/2,-p.r/2,p.r,p.r*.6);cx.restore();});
+ parts=parts.filter(p=>p.l>0&&p.y<cv.height+20);if(parts.length)requestAnimationFrame(loop);else cx.clearRect(0,0,cv.width,cv.height);}
+const sel=$("grp");GROUPS.forEach((g,k)=>{const o=document.createElement("option");o.value=k+1;o.textContent="Kumpulan "+(k+1)+" · "+g;sel.appendChild(o)});
+function checkGrp(){const d=store.get(KEY);if(!d)return false;const x=JSON.parse(d);sel.value=x.g;sel.disabled=true;$("start").disabled=true;
+ $("grpMsg").textContent=`✅ Kumpulan ${x.g} dah jawab: ${x.p.toLocaleString("en")} mata (${x.r}/12 betul)`;return true}
+sel.onchange=()=>{grp=+sel.value||null;$("start").disabled=!grp;};
+let rc=0;$("reset").onclick=e=>{e.preventDefault();if(++rc<2){$("reset").textContent="Tekan sekali lagi untuk reset";return}store.del(KEY);location.reload()};
+$("snd").onclick=()=>{SFX.init();SFX.toggle();};
+$("start").onclick=start;checkGrp();
+$("copy").onclick=async()=>{const t=`Kuiz Micro-Credential: Kumpulan ${grp} (${GROUPS[grp-1]}) dapat ${pts} mata, ${right}/12 betul 🎓`;
+ try{await navigator.clipboard.writeText(t);$("copied").textContent="Disalin! 👍";}catch(e){$("copied").textContent=t;}};
+</script>
+</body>
+</html>

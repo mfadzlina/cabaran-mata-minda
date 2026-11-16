@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Papan Pendahulu · Kuiz Micro-Credential</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1d1538;--bg:#140f2b;--pop:#6c4cff;--sun:#ffc23d;--mint:#2ec4a6;--muted:#a79fc9}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Nunito,sans-serif;color:#fff;background:radial-gradient(ellipse at top,#2c1f66,#140f2b 70%);padding:24px 18px 40px}
+h1,h2,.f{font-family:"Baloo 2",sans-serif;margin:0}
+.wrap{max-width:1000px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+header h1{font-size:38px;line-height:1}
+header h1 span{color:var(--sun)}
+header p{margin:4px 0 0;color:var(--muted);font-weight:700}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button{font-family:"Baloo 2";font-weight:700;font-size:16px;cursor:pointer;border:2px solid #fff3;border-radius:12px;padding:8px 14px;background:#ffffff14;color:#fff}
+button:hover{background:#ffffff24}
+button.on{background:var(--sun);color:var(--ink);border-color:var(--sun)}
+.podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:14px;align-items:end;margin:6px 0 22px}
+.pod{text-align:center;border-radius:20px 20px 8px 8px;padding:14px 10px;background:#ffffff10;border:2px solid #ffffff20;transition:all .5s}
+.pod .m{font-size:42px;line-height:1}
+.pod .n{font-family:"Baloo 2";font-weight:800;font-size:22px;margin-top:4px}
+.pod .t{color:var(--muted);font-size:13px;font-weight:700;min-height:34px}
+.pod .s{font-family:"Baloo 2";font-weight:800;font-size:30px;color:var(--sun)}
+.pod.p1{min-height:230px;background:linear-gradient(180deg,#ffc23d33,#ffffff08);border-color:var(--sun)}
+.pod.p2{min-height:190px}.pod.p3{min-height:160px}
+.list{position:relative}
+.row{position:absolute;left:0;right:0;height:56px;display:flex;align-items:center;gap:12px;padding:0 14px;border-radius:14px;background:#ffffff0d;border:1px solid #ffffff18;transition:transform .6s cubic-bezier(.2,.8,.2,1),background .3s}
+.row.flash{background:#2ec4a640}
+.rk{font-family:"Baloo 2";font-weight:800;font-size:22px;width:34px;text-align:center}
+.nm{flex:none;width:250px;line-height:1.1}
+.nm b{display:block;font-size:16px}.nm small{color:var(--muted);font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.bar{flex:1;height:18px;background:#ffffff12;border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--pop),var(--mint));transition:width .7s}
+.sc{font-family:"Baloo 2";font-weight:800;font-size:24px;width:90px;text-align:right}
+.ed{display:none;width:120px;font-family:"Baloo 2";font-size:20px;font-weight:800;text-align:center;border-radius:10px;border:2px solid var(--sun);background:#fff;color:var(--ink);padding:4px}
+body.edit .ed{display:block}body.edit .sc{display:none}
+.hint{color:var(--muted);font-size:14px;margin:0 0 12px;display:none}
+body.edit .hint{display:block}
+.hide .sc,.hide .pod .s{filter:blur(9px)}
+@media (max-width:700px){.nm{width:130px}.sc{width:70px;font-size:20px}header h1{font-size:30px}.pod .n{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <header>
+  <div><h1>🏆 Papan <span>Pendahulu</span></h1><p>Kuiz Micro-Credential · 11 kumpulan</p></div>
+  <div class="btns">
+   <button id="bEdit">✏️ Masukkan Skor</button>
+   <button id="bHide">🙈 Sembunyi Skor</button>
+   <button id="bReveal">🥁 Dedah Juara</button>
+   <button id="bReset">♻️ Reset</button>
+  </div>
+ </header>
+ <p class="hint">Taip mata kuiz setiap kumpulan (rujuk skrin keputusan di telefon kumpulan), kemudian tekan Enter. Kosongkan untuk padam.</p>
+ <div class="podium" id="podium"></div>
+ <div class="list" id="list"></div>
+</div>
+<canvas id="fx" style="position:fixed;inset:0;pointer-events:none"></canvas>
+<script>
+const GROUPS=["English","AI For Industrial Automation","Electrical Circuit / Workshop","IC Assembly & Packaging Process","Fiber Optic Communication Technology","Programming Language","Programming and Interfacing","Electrical Drafting and Design","Offshore Platform","AutoCAD Plant 3D for Designer","CSTP"];
+const KEY="mcq_board";const $=s=>document.getElementById(s);
+let S={};try{S=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const list=$("list"),rows=[];
+GROUPS.forEach((g,k)=>{const r=document.createElement("div");r.className="row";
+ r.innerHTML=`<span class="rk">-</span><div class="nm"><b>Kumpulan ${k+1}</b><small>${g}</small></div><div class="bar"><i></i></div><span class="sc">–</span><input class="ed" inputmode="numeric" placeholder="0">`;
+ const inp=r.querySelector(".ed");inp.value=S[k+1]??"";
+ const commit=()=>{const v=inp.value.replace(/\D/g,"");if(v==="")delete S[k+1];else S[k+1]=+v;save();render(k+1)};
+ inp.onchange=commit;inp.onkeydown=e=>{if(e.key==="Enter"){commit();const nx=rows[(k+1)%11].querySelector(".ed");nx.focus();nx.select()}};
+ list.appendChild(r);rows.push(r)});
+list.style.height=(11*64)+"px";
+let lastLeader=null;
+function render(changed){
+ const order=GROUPS.map((g,k)=>({k:k+1,s:S[k+1]})).sort((a,b)=>(b.s??-1)-(a.s??-1)||a.k-b.k);
+ const max=Math.max(1,...order.map(o=>o.s||0));
+ order.forEach((o,pos)=>{const r=rows[o.k-1];r.style.transform=`translateY(${pos*64}px)`;
+  const has=o.s!=null;
+  r.querySelector(".rk").textContent=has?(pos<3?["🥇","🥈","🥉"][pos]:pos+1):"-";
+  r.querySelector(".sc").textContent=has?o.s.toLocaleString("en"):"–";
+  r.querySelector(".bar i").style.width=has?(o.s/max*100)+"%":"0";
+  if(o.k===changed){r.classList.add("flash");setTimeout(()=>r.classList.remove("flash"),900)}});
+ const top=order.filter(o=>o.s!=null).slice(0,3);
+ const slot=[1,0,2].map(p=>top[p]);
+ $("podium").innerHTML=slot.map((o,idx)=>{const p=[2,1,3][idx];
+  return `<div class="pod p${p}"><div class="m">${["🥇","🥈","🥉"][p-1]}</div>${o?`<div class="n">Kumpulan ${o.k}</div><div class="t">${GROUPS[o.k-1]}</div><div class="s">${o.s.toLocaleString("en")}</div>`:`<div class="n">—</div><div class="t">Menunggu skor</div>`}</div>`}).join("");
+ const leader=top[0]&&top[0].k;if(changed&&leader&&leader!==lastLeader){burst(60);ding()}lastLeader=leader;
+}
+render();
+$("bEdit").onclick=()=>{document.body.classList.toggle("edit");$("bEdit").classList.toggle("on");if(document.body.classList.contains("edit")){const f=rows[0].querySelector(".ed");f.focus()}};
+$("bHide").onclick=()=>{document.body.classList.toggle("hide");$("bHide").classList.toggle("on")};
+$("bReveal").onclick=()=>{document.body.classList.remove("edit","hide");$("bEdit").classList.remove("on");$("bHide").classList.remove("on");
+ drum();setTimeout(()=>{burst(220);fanfare()},1800)};
+let rc=0;$("bReset").onclick=()=>{if(++rc<2){$("bReset").textContent="Tekan lagi untuk padam semua";setTimeout(()=>{rc=0;$("bReset").textContent="♻️ Reset"},3000);return}
+ S={};save();rows.forEach(r=>r.querySelector(".ed").value="");rc=0;$("bReset").textContent="♻️ Reset";render()};
+// bunyi ringkas
+let AC=null;function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}return AC}
+function tone(f,t,d,type="triangle",v=.2){const c=ac();if(!c)return;const o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.value=f;const s=c.currentTime+t;g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(v,s+.01);g.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(g);g.connect(c.destination);o.start(s);o.stop(s+d+.05)}
+function ding(){[784,1047].forEach((f,k)=>tone(f,k*.1,.3))}
+function drum(){for(let k=0;k<22;k++)tone(90+Math.random()*30,k*.08,.07,"square",.12)}
+function fanfare(){[[523,0],[523,.15],[523,.3],[659,.45],[784,.75],[659,.95],[784,1.1],[1047,1.3]].forEach(([f,t])=>{tone(f,t,.35);tone(f/2,t,.35,"sine",.1)})}
+const cv=$("fx"),cx=cv.getContext("2d");let parts=[];function rs(){cv.width=innerWidth;cv.height=innerHeight}addEventListener("resize",rs);rs();
+function burst(n){const cols=["#6c4cff","#ffc23d","#2ec4a6","#ff5d73","#fff"];const was=parts.length;for(let k=0;k<n;k++)parts.push({x:innerWidth/2,y:innerHeight*.3,vx:(Math.random()-.5)*16,vy:-Math.random()*14-4,r:Math.random()*7+4,c:cols[k%5],a:Math.random()*6,l:110});if(!was)loop()}
+function loop(){cx.clearRect(0,0,cv.width,cv.height);parts.forEach(p=>{p.vy+=.33;p.x+=p.vx;p.y+=p.vy;p.a+=.2;p.l--;cx.save();cx.translate(p.x,p.y);cx.rotate(p.a);cx.fillStyle=p.c;cx.fillRect(-p.r/2,-p.r/2,p.r,p.r*.6);cx.restore()});parts=parts.filter(p=>p.l>0&&p.y<cv.height+20);if(parts.length)requestAnimationFrame(loop);else cx.clearRect(0,0,cv.width,cv.height)}
+</script>
+</body>
+</html>
