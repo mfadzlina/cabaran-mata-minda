@@ -47,6 +47,7 @@ button:disabled{opacity:.55;cursor:default}
 .emark span{display:block;font-weight:800}
 .emark b{display:block;font-family:"Baloo 2";font-size:60px;line-height:1}
 .emark small{font-weight:700}
+.snd{cursor:pointer;font-size:15px;padding:4px 10px;box-shadow:none}
 /* HUD */
 .hud{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .pill{background:#fff;border:3px solid var(--ink);border-radius:99px;padding:4px 14px;font-weight:800;font-size:15px;white-space:nowrap}
@@ -124,6 +125,7 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:9}
    <div class="bar"><i id="prog"></i></div>
    <span class="pill">⭐ <span id="pts">0</span></span>
    <span class="pill" id="streak" title="Jawapan betul berturut-turut">🔥 0</span>
+   <button class="pill snd" id="snd" title="Bunyi">🔊</button>
   </div>
   <div class="card">
    <div class="timer"><i id="tbar"></i></div>
@@ -175,6 +177,34 @@ const MINDA=[
 const GROUPS=["English","AI For Industrial Automation","Electrical Circuit / Workshop","IC Assembly & Packaging Process","Fiber Optic Communication Technology","Programming Language","Programming and Interfacing","Electrical Drafting and Design","Offshore Platform","AutoCAD Plant 3D for Designer","CSTP"];
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},clear(){try{Object.keys(localStorage).filter(k=>k.startsWith("cmm_")).forEach(k=>localStorage.removeItem(k))}catch(e){}}};
 let grp=null;
+
+// ===== AUDIO (Web Audio, tiada fail) =====
+const SFX={ctx:null,on:true,music:null,master:null,
+ init(){if(this.ctx)return;try{const C=window.AudioContext||window.webkitAudioContext;this.ctx=new C();this.master=this.ctx.createGain();this.master.gain.value=.9;this.master.connect(this.ctx.destination);}catch(e){this.ctx=null}},
+ tone(f,t0,d,type="sine",v=.25,slide=0){const c=this.ctx;if(!c||!this.on)return;const o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f,c.currentTime+t0);
+  if(slide)o.frequency.exponentialRampToValueAtTime(f*slide,c.currentTime+t0+d);
+  g.gain.setValueAtTime(0,c.currentTime+t0);g.gain.linearRampToValueAtTime(v,c.currentTime+t0+.01);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+t0+d);
+  o.connect(g);g.connect(this.master);o.start(c.currentTime+t0);o.stop(c.currentTime+t0+d+.05);},
+ click(){this.tone(660,0,.06,"triangle",.15)},
+ right(){[523,659,784,1047].forEach((f,k)=>this.tone(f,k*.08,.25,"triangle",.22))},
+ wrong(){this.tone(220,0,.35,"sawtooth",.15,.6);this.tone(160,.12,.4,"square",.08,.7)},
+ tick(){this.tone(1200,0,.05,"square",.08)},
+ hint(){this.tone(400,0,.4,"sine",.15,2)},
+ streak(){[784,988,1175,1568].forEach((f,k)=>this.tone(f,k*.06,.18,"square",.1))},
+ fanfare(){[[523,0],[523,.15],[523,.3],[659,.45],[784,.75],[659,.95],[784,1.1],[1047,1.3]].forEach(([f,t])=>{this.tone(f,t,.35,"triangle",.22);this.tone(f/2,t,.35,"sine",.12)})},
+ startMusic(){if(!this.ctx||this.music)return;const c=this.ctx,bpm=104,b=60/bpm;
+  const mel=[523,0,659,784,659,0,587,523,440,0,523,587,523,0,392,0];const bass=[131,131,165,165,147,147,110,110];
+  const g=c.createGain();g.gain.value=this.on?.35:0;g.connect(this.master);let step=0,next=c.currentTime+.1;
+  const play=(f,t,d,type,v)=>{const o=c.createOscillator(),e=c.createGain();o.type=type;o.frequency.value=f;e.gain.setValueAtTime(0,t);e.gain.linearRampToValueAtTime(v,t+.01);e.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(e);e.connect(g);o.start(t);o.stop(t+d+.05)};
+  const id=setInterval(()=>{while(next<c.currentTime+.3){const m=mel[step%16];if(m)play(m,next,b*.45,"triangle",.09);
+    if(step%2===0)play(bass[(step/2|0)%8],next,b*.9,"sine",.14);
+    if(step%4===2)play(2400,next,.03,"square",.015);
+    next+=b/2;step++;}},60);
+  this.music={g,id};},
+ stopMusic(){if(!this.music)return;clearInterval(this.music.id);const g=this.music.g;try{g.gain.linearRampToValueAtTime(0,this.ctx.currentTime+.4)}catch(e){}setTimeout(()=>g.disconnect(),600);this.music=null;},
+ toggle(){this.on=!this.on;if(this.music)this.music.g.gain.value=this.on?.35:0;$("snd").textContent=this.on?"🔊":"🔇";}
+};
+document.addEventListener("click",e=>{if(e.target.closest("button")&&e.target.id!=="snd"){SFX.init();if(SFX.ctx&&SFX.ctx.state==="suspended")SFX.ctx.resume();}},true);
 const TIME=30;
 let Q=[],i=0,pts=0,streak=0,best=0,right=0,hints=0,tick=null,left=TIME,usedHint=false,locked=false,log=[];
 const $=s=>document.getElementById(s);
@@ -185,7 +215,7 @@ function build(){
  Q=[];let a=0;for(let k=0;k<12;k++){ if(k%3===2&&a<il.length) Q.push(il[a++]); else Q.push(mi.shift()); }
  while(a<il.length)Q.push(il[a++]);
 }
-function start(){if(!grp)return;if(store.get("cmm_done")){checkGrp();return;}build();i=0;pts=0;streak=0;best=0;right=0;hints=0;log=[];
+function start(){if(!grp)return;SFX.init();if(SFX.ctx&&SFX.ctx.state==="suspended")SFX.ctx.resume();SFX.click();SFX.startMusic();if(store.get("cmm_done")){checkGrp();return;}build();i=0;pts=0;streak=0;best=0;right=0;hints=0;log=[];
  $("intro").classList.add("hidden");$("end").classList.add("hidden");$("game").classList.remove("hidden");show();}
 function hud(){$("qno").textContent=(i+1)+"/"+Q.length;$("prog").style.width=(i/Q.length*100)+"%";$("pts").textContent=pts;$("streak").textContent="🔥 "+streak;}
 function show(){
@@ -198,7 +228,7 @@ function show(){
    <form class="ans" id="f"><input id="inp" inputmode="numeric" autocomplete="off" placeholder="? ? ?"><button class="btn-mint">Jawab</button></form>
    <div class="tools"><button type="button" class="btn-ghost" id="hint">🫣 Bantu sepetkan (−5 mata)</button><button type="button" class="btn-ghost" id="dig">🔢 Berapa digit?</button></div>`;
   $("f").onsubmit=e=>{e.preventDefault();const v=$("inp").value.replace(/\D/g,"");if(!v)return;judge(v===q.a,v);};
-  $("hint").onclick=()=>{if(locked)return;$("ib").classList.toggle("squint");if(!usedHint){usedHint=true;hints++;}};
+  $("hint").onclick=()=>{if(locked)return;SFX.hint();$("ib").classList.toggle("squint");if(!usedHint){usedHint=true;hints++;}};
   $("dig").onclick=e=>{e.target.textContent="🔢 "+q.a.length+" digit";e.target.disabled=true;};
   setTimeout(()=>{const n=$("inp");n&&n.focus({preventScroll:true})},50);
  } else {
@@ -209,14 +239,14 @@ function show(){
    if(!ok)area.querySelector(`.opt[data-o="${q.a}"]`).classList.add("right");judge(ok,q.o[+b.dataset.o]);});
  }
  left=TIME;const tb=$("tbar");tb.style.transition="none";tb.style.width="100%";requestAnimationFrame(()=>{tb.style.transition="width 1s linear"});
- clearInterval(tick);tick=setInterval(()=>{left--;tb.style.width=(left/TIME*100)+"%";if(left<=0){clearInterval(tick);if(!locked){
+ clearInterval(tick);tick=setInterval(()=>{left--;tb.style.width=(left/TIME*100)+"%";if(left<=5&&left>0&&!locked)SFX.tick();if(left<=0){clearInterval(tick);if(!locked){
    if(Q[i].type==="minda")$("area").querySelector(`.opt[data-o="${Q[i].a}"]`).classList.add("right");judge(false,null,true);}}},1000);
 }
 function judge(ok,given,timeout){
  if(locked)return;locked=true;clearInterval(tick);const q=Q[i];
  let gain=0;
- if(ok){gain=10-(usedHint?5:0)+(left>=20?2:0);gain=Math.min(gain,10);right++;streak++;best=Math.max(best,streak);pts+=gain;burst(28);floatTxt("+"+gain);}
- else{streak=0;}
+ if(ok){(streak>=2?SFX.streak():SFX.right());gain=10-(usedHint?5:0)+(left>=20?2:0);gain=Math.min(gain,10);right++;streak++;best=Math.max(best,streak);pts+=gain;burst(28);floatTxt("+"+gain);}
+ else{streak=0;SFX.wrong();}
  hud();
  const answer=q.type==="mata"?q.a:q.o[q.a];
  log.push({ok,q:q.type==="mata"?"Ilusi "+(ILUSI.indexOf(ILUSI.find(x=>x.img===q.img))+1):q.q,a:answer});
@@ -224,10 +254,10 @@ function judge(ok,given,timeout){
  $("fb").innerHTML=`<div class="feedback ${ok?"ok":"no"}">${head} ${ok?"":`Jawapan: <b>${answer}</b>`}<div class="why">${q.why}</div></div>
   <button class="next btn-pop" id="nx">${i===Q.length-1?"Lihat Keputusan 🏁":"Soalan Seterusnya →"}</button>`;
  if(q.type==="mata"){$("ib").classList.add("squint");const inp=$("inp");if(inp)inp.disabled=true;}
- $("nx").onclick=()=>{i++;if(i<Q.length)show();else finish();};
+ $("nx").onclick=()=>{SFX.click();i++;if(i<Q.length)show();else finish();};
  $("nx").scrollIntoView({behavior:"smooth",block:"nearest"});
 }
-function finish(){
+function finish(){SFX.stopMusic();setTimeout(()=>SFX.fanfare(),300);
  $("game").classList.add("hidden");$("end").classList.remove("hidden");$("prog").style.width="100%";
  $("final").textContent=pts;$("sRight").textContent=right+"/"+Q.length;$("sBest").textContent=best;$("sHint").textContent=hints;
  const r=pts>=100?["🏆","Mata Helang, Otak Genius!"]:pts>=75?["🥇","Hebat! Hampir sempurna"]:pts>=50?["🥈","Boleh tahan, tapi boleh lagi!"]:pts>=25?["🥉","Mata kena rehat sikit 😴"]:["🙈","Cuba lagi, jangan putus asa!"];
@@ -244,6 +274,7 @@ function checkGrp(){const d=store.get("cmm_done");if(d){const x=JSON.parse(d);se
 sel.onchange=()=>{grp=+sel.value||null;$("start").disabled=!grp;$("grpMsg").textContent=""};
 let rc=0;$("reset").onclick=e=>{e.preventDefault();if(++rc<2){$("reset").textContent="Tekan sekali lagi untuk reset";return}store.clear();location.reload()};
 checkGrp();
+$("snd").onclick=()=>{SFX.init();SFX.toggle();};
 $("start").onclick=start;
 $("copy").onclick=async()=>{const t=`Kumpulan ${grp} (${GROUPS[grp-1]}): Markah Energizer ${Math.round(pts/12)}/10 — ${pts}/120 dalam Cabaran Mata & Minda! (${right}/12 betul, streak ${best}) 🧐 Berani cuba?`;
  try{await navigator.clipboard.writeText(t);$("copied").textContent="Disalin! Tampal di WhatsApp 👍";}catch(e){$("copied").textContent=t;}};
