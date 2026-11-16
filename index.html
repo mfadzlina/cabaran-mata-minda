@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cabaran Mata & Minda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff6e6;--ink:#2b2140;--pop:#ff5d73;--sun:#ffc23d;--mint:#2ec4a6;--sky:#5b8cff;--card:#ffffff;--muted:#7a6f8c}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:Nunito,system-ui,sans-serif;color:var(--ink);background:var(--bg);
+ background-image:radial-gradient(circle at 10% 10%,#ffe0b3 0 120px,transparent 121px),radial-gradient(circle at 92% 18%,#ffd1dc 0 90px,transparent 91px),radial-gradient(circle at 85% 95%,#c9f2e8 0 140px,transparent 141px);
+ background-attachment:fixed;display:flex;justify-content:center;padding:18px 14px 40px}
+.wrap{width:100%;max-width:640px}
+h1,h2,h3,.big{font-family:"Baloo 2",sans-serif;margin:0}
+.card{background:var(--card);border:3px solid var(--ink);border-radius:22px;box-shadow:6px 6px 0 var(--ink);padding:22px}
+.hidden{display:none!important}
+button{font-family:"Baloo 2",sans-serif;font-weight:700;font-size:18px;cursor:pointer;border:3px solid var(--ink);border-radius:14px;padding:10px 18px;background:var(--sun);color:var(--ink);box-shadow:3px 3px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
+button:disabled{opacity:.55;cursor:default}
+.btn-pop{background:var(--pop);color:#fff}
+.btn-mint{background:var(--mint);color:#fff}
+.btn-ghost{background:#fff}
+/* intro */
+.intro{text-align:center}
+.intro .emoji{font-size:64px;line-height:1;animation:bob 2.2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px) rotate(-4deg)}}
+.intro h1{font-size:40px;line-height:1.05;margin:10px 0 6px}
+.intro h1 span{color:var(--pop)}
+.intro p{color:var(--muted);font-size:17px;margin:6px 0 18px}
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 20px}
+.rule{background:var(--bg);border:2px dashed var(--ink);border-radius:14px;padding:10px 6px;font-size:14px;font-weight:700}
+.rule b{display:block;font-size:24px}
+.qrbox{display:flex;align-items:center;gap:18px;justify-content:center;background:var(--bg);border:3px solid var(--ink);border-radius:18px;padding:14px;margin:0 0 20px;text-align:left}
+.qrbox img{width:200px;height:200px;border:3px solid var(--ink);border-radius:12px;background:#fff;image-rendering:pixelated;flex:none}
+.qrtxt{font-size:16px;color:var(--muted);max-width:220px}
+.qrtxt b{display:block;font-family:"Baloo 2";font-size:24px;color:var(--ink);line-height:1.1;margin-bottom:6px}
+@media (max-width:480px){.qrbox{flex-direction:column;text-align:center}.qrbox img{width:180px;height:180px}}
+/* HUD */
+.hud{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.pill{background:#fff;border:3px solid var(--ink);border-radius:99px;padding:4px 14px;font-weight:800;font-size:15px;white-space:nowrap}
+.bar{flex:1;height:16px;background:#fff;border:3px solid var(--ink);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--mint),var(--sky));transition:width .4s}
+.timer{height:8px;background:#eee3d2;border-radius:99px;overflow:hidden;margin:0 0 14px}
+.timer i{display:block;height:100%;width:100%;background:var(--pop);transition:width 1s linear}
+.tag{display:inline-block;font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:99px;border:2px solid var(--ink);margin-bottom:10px}
+.tag.mata{background:#d8e4ff}.tag.minda{background:#ffe0e6}
+.q{font-size:24px;line-height:1.25;margin:0 0 16px}
+.imgbox{position:relative;border:3px solid var(--ink);border-radius:14px;overflow:hidden;margin-bottom:14px;background:#000}
+.imgbox img{display:block;width:100%;height:auto;transition:filter .6s,transform .6s}
+.imgbox.squint img{filter:blur(7px) contrast(1.15);transform:scale(1.02)}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;background:#fff;font-size:19px;display:flex;gap:12px;align-items:center}
+.opt .k{flex:none;width:32px;height:32px;border-radius:50%;border:2px solid var(--ink);display:grid;place-items:center;background:var(--sun);font-size:16px}
+.opt.right{background:#c9f2e8}.opt.wrong{background:#ffd1d8;animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.ans{display:flex;gap:10px}
+.ans input{flex:1;min-width:0;font-family:"Baloo 2",sans-serif;font-size:26px;font-weight:800;text-align:center;border:3px solid var(--ink);border-radius:14px;padding:6px 10px;outline:none}
+.ans input:focus{box-shadow:0 0 0 4px #ffc23d88}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tools button{font-size:15px;padding:6px 12px}
+.feedback{margin-top:16px;border-radius:14px;padding:14px 16px;border:3px solid var(--ink);font-weight:700;font-size:17px;animation:pop .3s}
+.feedback.ok{background:#c9f2e8}.feedback.no{background:#ffe0e6}
+.feedback .why{font-weight:500;color:#4b4060;margin-top:4px;font-size:15px}
+@keyframes pop{from{transform:scale(.9);opacity:0}}
+.next{margin-top:14px;width:100%}
+.float{position:fixed;left:50%;top:40%;transform:translateX(-50%);font-family:"Baloo 2";font-size:44px;font-weight:800;color:var(--mint);pointer-events:none;animation:up 1s forwards;text-shadow:2px 2px 0 var(--ink)}
+@keyframes up{to{transform:translate(-50%,-80px);opacity:0}}
+/* end */
+.end{text-align:center}
+.end .medal{font-size:80px;line-height:1;animation:bob 2s infinite}
+.end h2{font-size:34px;margin:6px 0}
+.score{font-family:"Baloo 2";font-size:64px;font-weight:800;color:var(--pop);line-height:1}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+.stat{background:var(--bg);border:2px solid var(--ink);border-radius:14px;padding:10px 4px;font-size:13px;font-weight:700}
+.stat b{display:block;font-family:"Baloo 2";font-size:26px}
+.review{text-align:left;margin:10px 0 18px;font-size:15px}
+.review div{padding:7px 0;border-bottom:1px dashed #d8cbb5}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:9}
+.foot{text-align:center;color:var(--muted);font-size:13px;margin-top:16px}
+@media (max-width:480px){.intro h1{font-size:32px}.q{font-size:21px}.rules{grid-template-columns:1fr 1fr 1fr}}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+<div class="wrap">
+
+ <section id="intro" class="card intro">
+  <div class="emoji">🧐</div>
+  <h1>Cabaran <span>Mata</span> &amp; Minda</h1>
+  <p>12 soalan. Sepetkan mata, picit otak, jangan cepat melatah!</p>
+  <div class="rules">
+   <div class="rule"><b>👀</b>4 ilusi nombor tersorok</div>
+   <div class="rule"><b>🧠</b>8 teka-teki minda</div>
+   <div class="rule"><b>⏱️</b>30 saat setiap soalan</div>
+  </div>
+  <div class="qrbox">
+   <img src="img/qr.png" alt="Kod QR untuk buka permainan">
+   <div class="qrtxt"><b>📱 Imbas untuk main</b>Guna kamera telefon, kemudian tekan <i>Mula Main</i> serentak!</div>
+  </div>
+  <button class="btn-pop" id="start" style="font-size:22px;padding:12px 34px">Mula Main ▶</button>
+ </section>
+
+ <section id="game" class="hidden">
+  <div class="hud">
+   <span class="pill" id="qno">1/12</span>
+   <div class="bar"><i id="prog"></i></div>
+   <span class="pill">⭐ <span id="pts">0</span></span>
+   <span class="pill" id="streak" title="Jawapan betul berturut-turut">🔥 0</span>
+  </div>
+  <div class="card">
+   <div class="timer"><i id="tbar"></i></div>
+   <span class="tag" id="tag"></span>
+   <h3 class="q" id="qtext"></h3>
+   <div id="area"></div>
+   <div id="fb"></div>
+  </div>
+ </section>
+
+ <section id="end" class="card end hidden">
+  <div class="medal" id="medal">🏆</div>
+  <h2 id="rank"></h2>
+  <div class="score"><span id="final">0</span><small style="font-size:26px;color:var(--muted)"> / 120</small></div>
+  <div class="stats">
+   <div class="stat"><b id="sRight">0</b>Betul</div>
+   <div class="stat"><b id="sBest">0</b>Streak terbaik</div>
+   <div class="stat"><b id="sHint">0</b>Bantuan diguna</div>
+  </div>
+  <div class="review" id="review"></div>
+  <div class="row">
+   <button class="btn-pop" id="again">Main Lagi 🔁</button>
+   <button class="btn-ghost" id="copy">Salin Skor 📋</button>
+  </div>
+  <div id="copied" class="foot"></div>
+ </section>
+
+ <div class="foot">Tip: untuk soalan ilusi, jauhkan skrin atau kecilkan mata 😉</div>
+</div>
+
+<script>
+const ILUSI=[
+ {img:"img/m1.jpg",a:"73",why:"Dua digit besar, 7 di kiri dan 3 di kanan."},
+ {img:"img/m2.jpg",a:"58",why:"5 dan 8 terbentuk daripada bayang di celah bunga."},
+ {img:"img/m3.jpg",a:"91",why:"Tersorok di atas sebelah kanan, condong ke kiri."},
+ {img:"img/m4.jpg",a:"406",why:"Tiga digit di bawah sebelah kiri, condong sikit."}
+];
+const MINDA=[
+ {q:"Apa yang makin diambil, makin besar?",o:["Lubang","Belon","Kek","Hutang"],a:0,why:"Makin banyak tanah dikorek, makin besar lubangnya."},
+ {q:"Ayah Ali ada 4 orang anak: Satu, Dua, Tiga dan ...?",o:["Empat","Ali","Lima","Kosong"],a:1,why:"Soalan dah sebut: AYAH ALI. Anak keempat ialah Ali sendiri!"},
+ {q:"Berapa bulan dalam setahun yang ada 28 hari?",o:["1 bulan","2 bulan","6 bulan","12 bulan"],a:3,why:"Semua bulan ada sekurang-kurangnya 28 hari."},
+ {q:"Benda apa yang naik tetapi tak pernah turun?",o:["Harga minyak","Belon","Umur","Lif"],a:2,why:"Umur sentiasa bertambah, tak pernah berkurang."},
+ {q:"Apa yang ada gigi tetapi tak boleh menggigit?",o:["Sikat","Bayi","Gergaji","Zip"],a:0,why:"Sikat ada gigi, tapi untuk rambut, bukan untuk makan! (Zip pun boleh, tapi sikat jawapan klasik.)"},
+ {q:"Makin dia mengeringkan, makin dia basah. Siapa dia?",o:["Matahari","Tuala","Kipas","Span"],a:1,why:"Tuala keringkan badan kita, tapi dirinya sendiri jadi basah."},
+ {q:"Ada 3 biji epal. Awak ambil 2. Berapa biji epal yang AWAK ada?",o:["1","2","3","0"],a:1,why:"Awak ambil 2, jadi awak ada 2 biji."},
+ {q:"Apa yang boleh pecah tanpa disentuh langsung?",o:["Kaca","Telur","Janji","Belon"],a:2,why:"Janji boleh dipecahkan tanpa sentuh apa-apa."}
+];
+const TIME=30;
+let Q=[],i=0,pts=0,streak=0,best=0,right=0,hints=0,tick=null,left=TIME,usedHint=false,locked=false,log=[];
+const $=s=>document.getElementById(s);
+function shuffle(a){for(let k=a.length-1;k>0;k--){const j=Math.random()*(k+1)|0;[a[k],a[j]]=[a[j],a[k]]}return a}
+function build(){
+ const il=ILUSI.map(x=>({...x,type:"mata"})), mi=shuffle(MINDA.map(x=>({...x,type:"minda"})));
+ // selang-seli: 2 minda, 1 mata
+ Q=[];let a=0;for(let k=0;k<12;k++){ if(k%3===2&&a<il.length) Q.push(il[a++]); else Q.push(mi.shift()); }
+ while(a<il.length)Q.push(il[a++]);
+}
+function start(){build();i=0;pts=0;streak=0;best=0;right=0;hints=0;log=[];
+ $("intro").classList.add("hidden");$("end").classList.add("hidden");$("game").classList.remove("hidden");show();}
+function hud(){$("qno").textContent=(i+1)+"/"+Q.length;$("prog").style.width=(i/Q.length*100)+"%";$("pts").textContent=pts;$("streak").textContent="🔥 "+streak;}
+function show(){
+ const q=Q[i];usedHint=false;locked=false;$("fb").innerHTML="";hud();
+ const tag=$("tag");tag.className="tag "+q.type;tag.textContent=q.type==="mata"?"👀 Ilusi Mata":"🧠 Teka-teki";
+ const area=$("area");
+ if(q.type==="mata"){
+  $("qtext").textContent="Sepetkan mata. Nombor berapa yang tersorok dalam gambar ni?";
+  area.innerHTML=`<div class="imgbox" id="ib"><img src="${q.img}" alt="Gambar ilusi taman bunga"></div>
+   <form class="ans" id="f"><input id="inp" inputmode="numeric" autocomplete="off" placeholder="? ? ?"><button class="btn-mint">Jawab</button></form>
+   <div class="tools"><button type="button" class="btn-ghost" id="hint">🫣 Bantu sepetkan (−5 mata)</button><button type="button" class="btn-ghost" id="dig">🔢 Berapa digit?</button></div>`;
+  $("f").onsubmit=e=>{e.preventDefault();const v=$("inp").value.replace(/\D/g,"");if(!v)return;judge(v===q.a,v);};
+  $("hint").onclick=()=>{if(locked)return;$("ib").classList.toggle("squint");if(!usedHint){usedHint=true;hints++;}};
+  $("dig").onclick=e=>{e.target.textContent="🔢 "+q.a.length+" digit";e.target.disabled=true;};
+  setTimeout(()=>{const n=$("inp");n&&n.focus({preventScroll:true})},50);
+ } else {
+  $("qtext").textContent=q.q;
+  const order=shuffle([0,1,2,3]);
+  area.innerHTML=`<div class="opts">${order.map((o,k)=>`<button class="opt" data-o="${o}"><span class="k">${"ABCD"[k]}</span>${q.o[o]}</button>`).join("")}</div>`;
+  area.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{if(locked)return;const ok=+b.dataset.o===q.a;b.classList.add(ok?"right":"wrong");
+   if(!ok)area.querySelector(`.opt[data-o="${q.a}"]`).classList.add("right");judge(ok,q.o[+b.dataset.o]);});
+ }
+ left=TIME;const tb=$("tbar");tb.style.transition="none";tb.style.width="100%";requestAnimationFrame(()=>{tb.style.transition="width 1s linear"});
+ clearInterval(tick);tick=setInterval(()=>{left--;tb.style.width=(left/TIME*100)+"%";if(left<=0){clearInterval(tick);if(!locked){
+   if(Q[i].type==="minda")$("area").querySelector(`.opt[data-o="${Q[i].a}"]`).classList.add("right");judge(false,null,true);}}},1000);
+}
+function judge(ok,given,timeout){
+ if(locked)return;locked=true;clearInterval(tick);const q=Q[i];
+ let gain=0;
+ if(ok){gain=10-(usedHint?5:0)+(left>=20?2:0);gain=Math.min(gain,10);right++;streak++;best=Math.max(best,streak);pts+=gain;burst(28);floatTxt("+"+gain);}
+ else{streak=0;}
+ hud();
+ const answer=q.type==="mata"?q.a:q.o[q.a];
+ log.push({ok,q:q.type==="mata"?"Ilusi "+(ILUSI.indexOf(ILUSI.find(x=>x.img===q.img))+1):q.q,a:answer});
+ const head=ok?(streak>=3?`Power! ${streak} betul berturut-turut 🔥`:"Betul! 🎉"):(timeout?"Masa tamat ⏰":"Alamak, salah 😅");
+ $("fb").innerHTML=`<div class="feedback ${ok?"ok":"no"}">${head} ${ok?"":`Jawapan: <b>${answer}</b>`}<div class="why">${q.why}</div></div>
+  <button class="next btn-pop" id="nx">${i===Q.length-1?"Lihat Keputusan 🏁":"Soalan Seterusnya →"}</button>`;
+ if(q.type==="mata"){$("ib").classList.add("squint");const inp=$("inp");if(inp)inp.disabled=true;}
+ $("nx").onclick=()=>{i++;if(i<Q.length)show();else finish();};
+ $("nx").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function finish(){
+ $("game").classList.add("hidden");$("end").classList.remove("hidden");$("prog").style.width="100%";
+ $("final").textContent=pts;$("sRight").textContent=right+"/"+Q.length;$("sBest").textContent=best;$("sHint").textContent=hints;
+ const r=pts>=100?["🏆","Mata Helang, Otak Genius!"]:pts>=75?["🥇","Hebat! Hampir sempurna"]:pts>=50?["🥈","Boleh tahan, tapi boleh lagi!"]:pts>=25?["🥉","Mata kena rehat sikit 😴"]:["🙈","Cuba lagi, jangan putus asa!"];
+ $("medal").textContent=r[0];$("rank").textContent=r[1];
+ $("review").innerHTML=log.map((l,k)=>`<div>${l.ok?"✅":"❌"} <b>${k+1}.</b> ${l.q} <span style="color:var(--muted)">→ ${l.a}</span></div>`).join("");
+ $("copied").textContent="";if(pts>=50)burst(160);
+}
+$("start").onclick=start;$("again").onclick=start;
+$("copy").onclick=async()=>{const t=`Saya dapat ${pts}/120 dalam Cabaran Mata & Minda! (${right}/12 betul, streak ${best}) 🧐 Berani cuba?`;
+ try{await navigator.clipboard.writeText(t);$("copied").textContent="Disalin! Tampal di WhatsApp 👍";}catch(e){$("copied").textContent=t;}};
+function floatTxt(t){const d=document.createElement("div");d.className="float";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),1000);}
+// confetti
+const cv=$("fx"),cx=cv.getContext("2d");let parts=[];
+function rs(){cv.width=innerWidth;cv.height=innerHeight}addEventListener("resize",rs);rs();
+function burst(n){const cols=["#ff5d73","#ffc23d","#2ec4a6","#5b8cff","#b46cff"];
+ for(let k=0;k<n;k++)parts.push({x:innerWidth/2,y:innerHeight*.45,vx:(Math.random()-.5)*14,vy:-Math.random()*13-4,r:Math.random()*6+4,c:cols[k%5],a:Math.random()*6,l:90});
+ if(parts.length===n)loop();}
+function loop(){cx.clearRect(0,0,cv.width,cv.height);parts.forEach(p=>{p.vy+=.35;p.x+=p.vx;p.y+=p.vy;p.a+=.2;p.l--;cx.save();cx.translate(p.x,p.y);cx.rotate(p.a);cx.fillStyle=p.c;cx.fillRect(-p.r/2,-p.r/2,p.r,p.r*.6);cx.restore();});
+ parts=parts.filter(p=>p.l>0&&p.y<cv.height+20);if(parts.length)requestAnimationFrame(loop);else cx.clearRect(0,0,cv.width,cv.height);}
+</script>
+</body>
+</html>
